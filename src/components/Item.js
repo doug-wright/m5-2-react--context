@@ -1,63 +1,57 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 
-const Item = ({
-  index,
-  name,
-  cost,
-  value,
-  numOwned,
-  handleAttemptedPurchase,
-}) => {
-  const ref = React.useRef(null);
+import cookieMonster from '../monster32.png';
 
-  React.useEffect(() => {
-    if (index === 0) {
-      ref.current.focus();
+const Item = ({ firstItem, id, name, cost, value, type, numOwned, handleItemClick }) => {
+  const itemButton = useRef(null);
+
+  useEffect(() => {
+    if (firstItem) {
+      itemButton.current.focus();
     }
-  }, [index]);
-
+  }, [firstItem]);
+  
   return (
-    <Wrapper ref={ref} onClick={handleAttemptedPurchase}>
-      <Left>
+    <Button id={id} onClick={handleItemClick} ref={itemButton}>
+      <div>
         <Name>{name}</Name>
-        <Info>
-          Cost: {cost} cookie(s). Produces {value} cookies/second.
-        </Info>
-      </Left>
-      <Right>{numOwned}</Right>
-    </Wrapper>
+        <Detail>Cost: {cost} cookie(s). Produces {value} {type === 'tick' ? 'cookies/second.' : 'cookies/click'}</Detail>
+      </div>
+      <Owned>
+        {numOwned}
+      </Owned>
+    </Button>
   );
-};
+}
 
-const Wrapper = styled.button`
-  width: 100%;
+const Button = styled.button`
   display: flex;
-  align-items: center;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #444;
-  color: #fff;
+  flex-direction: row;
+  justify-content: space-between;
+  border: 0;
+  box-shadow: none;
+  background: none;
   text-align: left;
-  padding: 15px 0;
+  border-bottom: 1px solid gray;
+  padding: 20px 20px 20px 0;
+  color: white;
+  cursor: url(${cookieMonster}), pointer;
 `;
 
-const Left = styled.div`
-  flex: 1;
+const Name = styled.span`
+  font-weight: bold;
+  font-size: 1rem;
 `;
 
-const Name = styled.h4`
-  font-size: 22px;
+const Detail = styled.p`
+  color: lightgray;
+  font-size: 0.8rem;
 `;
 
-const Info = styled.div`
-  color: #ccc;
-  font-size: 15px;
-`;
-
-const Right = styled.div`
-  font-size: 32px;
-  padding: 0 20px;
+const Owned = styled.span`
+  font-size: 2rem;
+  margin-left: 20px;
 `;
 
 export default Item;

@@ -1,108 +1,123 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
+import useSound from 'use-sound';
 
-import useInterval from "../hooks/use-interval.hook";
+import Item from './Item';
+import useInterval from '../hooks/use-interval.hook';
+import useKeydown from '../hooks/useKeydown';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 import cookieSrc from "../cookie.svg";
-import Item from "./Item";
+import cookieMonster from '../monster32.png';
+import sndCrunch from '../crunch.mp3';
+import sndCookieMonster from '../cookie-monster.mp3';
 
 const items = [
-  { id: "cursor", name: "Cursor", cost: 10, value: 1 },
-  { id: "grandma", name: "Grandma", cost: 100, value: 10 },
-  { id: "farm", name: "Farm", cost: 1000, value: 80 },
+  { id: "cursor", name: "Cursor", cost: 10, value: 1, type: 'tick' },
+  { id: "grandma", name: "Grandma", cost: 100, value: 10, type: 'tick' },
+  { id: "farm", name: "Farm", cost: 1000, value: 80, type: 'tick' },
+  { id: 'megacursor', name: 'megaCursor', cost: 5000, value: 10, type: 'click' }
 ];
 
-const calculateCookiesPerSecond = (purchasedItems) => {
-  return Object.keys(purchasedItems).reduce((acc, itemId) => {
-    const numOwned = purchasedItems[itemId];
-    const item = items.find((item) => item.id === itemId);
-    const value = item.value;
-
-    return acc + value * numOwned;
-  }, 0);
-};
-
 const Game = () => {
-  const [numCookies, setNumCookies] = React.useState(1000);
-
-  const [purchasedItems, setPurchasedItems] = React.useState({
+  const [numCookies, setNumCookies] = useState(100);
+  const [cookiesPerClick, setCookiesPerClick] = useState(1);
+  const [purchasedItems, setPurchasedItems] = useState({
     cursor: 0,
     grandma: 0,
     farm: 0,
+    megacursor: 0
   });
+  const [playCrunch] = useSound(sndCrunch);
+  const [playCookieMonster] = useSound(sndCookieMonster);
 
-  const incrementCookies = () => {
-    setNumCookies((c) => c + 1);
-  };
+  // Prevent the default action of the spacebar registering a click event
+  // on the cookie if it has focus.
+  // const handleKeyUp = (event) => {
+  //   console.log(event.current.currentTarget);
+  //   event.preventDefault();
+  // }
+
+  useEffect(() => {
+    playCookieMonster();
+  }, [playCookieMonster]);
+
+  const handleItemClick = (event) => {
+    const index = items.findIndex(item => item.id === event.currentTarget.id);
+    const item = items[index];
+
+    if (numCookies >= item.cost) {
+      if (item.id === 'megacursor') {
+        setCookiesPerClick(cookiesPerClick + item.value);
+      }
+
+      setNumCookies(numCookies - item.cost);
+      setPurchasedItems({ ...purchasedItems, [item.id]: purchasedItems[item.id] + 1 });
+    } else {
+      window.alert(`You can't afford a ${item.name}`);
+    }
+
+    // Increase pricing a random percentage from 1 to 10
+    const percentInc = Math.floor((Math.random() * 10) + 1) / 100 + 1;
+    const newCost = Math.floor(percentInc * item.cost);
+
+    items[index].cost = newCost;
+  }
+  
+  const handleCookieClick = () => {
+    setNumCookies(numCookies + cookiesPerClick);
+    playCrunch();
+  }
 
   useInterval(() => {
-    const numOfGeneratedCookies = calculateCookiesPerSecond(purchasedItems);
-
+    const numOfGeneratedCookies = calculateCookiesPerTick(purchasedItems);
+  
     setNumCookies(numCookies + numOfGeneratedCookies);
   }, 1000);
 
-  React.useEffect(() => {
-    document.title = `${numCookies} cookies - Cookie Clicker Workshop`;
+  const calculateCookiesPerTick = (purchasedItems) => {
+    let totalValue = 0;
 
-    return () => {
-      document.title = "Cookie Clicker Workshop";
-    };
-  }, [numCookies]);
-
-  React.useEffect(() => {
-    const handleKeydown = (ev) => {
-      if (ev.code === "Space") {
-        incrementCookies();
+    Object.keys(purchasedItems).forEach(key => {
+      const item = items.find(item => item.id === key);
+      
+      if (item.type === 'tick') {
+        totalValue += purchasedItems[key] * item.value;
       }
-    };
+    });
 
-    window.addEventListener("keydown", handleKeydown);
+    return totalValue;
+  }
 
-    return () => {
-      window.removeEventListener("keydown", handleKeydown);
-    };
-  });
+  useDocumentTitle(numCookies + ' - Cookie Clicker', 'Cookie Clicker');
+  useKeydown('Space', handleCookieClick);
 
   return (
     <Wrapper>
       <GameArea>
         <Indicator>
           <Total>{numCookies} cookies</Total>
-          <strong>{calculateCookiesPerSecond(purchasedItems)}</strong> cookies
-          per second
+          <strong>{calculateCookiesPerTick(purchasedItems)}</strong> cookies per second, <strong>{cookiesPerClick}</strong> cookie(s) per click
         </Indicator>
-        <Button onClick={incrementCookies}>
+        <Button onClick={handleCookieClick}>
           <Cookie src={cookieSrc} />
         </Button>
       </GameArea>
 
       <ItemArea>
         <SectionTitle>Items:</SectionTitle>
-        {items.map((item, index) => {
-          return (
-            <Item
-              key={item.id}
-              index={index}
-              name={item.name}
-              cost={item.cost}
-              value={item.value}
-              numOwned={purchasedItems[item.id]}
-              handleAttemptedPurchase={() => {
-                if (numCookies < item.cost) {
-                  alert("Cannot afford item");
-                  return;
-                }
-
-                setNumCookies(numCookies - item.cost);
-                setPurchasedItems({
-                  ...purchasedItems,
-                  [item.id]: purchasedItems[item.id] + 1,
-                });
-              }}
-            />
-          );
-        })}
+        {items.map((item, index) => <Item
+          firstItem={index === 0 ? true : false}
+          key={uuidv4()}
+          id={item.id}
+          name={item.name}
+          cost={item.cost}
+          value={item.value}
+          type={item.type}
+          numOwned={purchasedItems[item.id]}
+          handleItemClick={handleItemClick} />)}
       </ItemArea>
       <HomeLink to="/">Return home</HomeLink>
     </Wrapper>
@@ -113,20 +128,17 @@ const Wrapper = styled.div`
   display: flex;
   height: 100vh;
 `;
+
 const GameArea = styled.div`
   flex: 1;
   display: grid;
   place-items: center;
 `;
+
 const Button = styled.button`
   border: none;
   background: transparent;
-  cursor: pointer;
-  transform-origin: center center;
-
-  &:active {
-    transform: scale(0.9);
-  }
+  cursor: url(${cookieMonster}), pointer;
 `;
 
 const Cookie = styled.img`
@@ -149,7 +161,7 @@ const SectionTitle = styled.h3`
 
 const Indicator = styled.div`
   position: absolute;
-  width: 250px;
+  width: 450px;
   top: 0;
   left: 0;
   right: 0;
