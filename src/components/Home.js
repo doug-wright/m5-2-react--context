@@ -2,7 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-const Home = () => {
+import useInterval from '../hooks/use-interval.hook';
+
+const Home = ({ numCookies, setNumCookies, purchasedItems, calculateCookiesPerTick }) => {
+  useInterval(() => {
+    const numOfGeneratedCookies = calculateCookiesPerTick(purchasedItems);
+  
+    setNumCookies(numCookies + numOfGeneratedCookies);
+  }, 1000);
+
   return (
     <Wrapper>
       <Title>Cookie game</Title>

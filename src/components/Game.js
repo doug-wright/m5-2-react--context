@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
@@ -14,31 +14,18 @@ import cookieMonster from '../monster32.png';
 import sndCrunch from '../crunch.mp3';
 import sndCookieMonster from '../cookie-monster.mp3';
 
-const items = [
-  { id: "cursor", name: "Cursor", cost: 10, value: 1, type: 'tick' },
-  { id: "grandma", name: "Grandma", cost: 100, value: 10, type: 'tick' },
-  { id: "farm", name: "Farm", cost: 1000, value: 80, type: 'tick' },
-  { id: 'megacursor', name: 'megaCursor', cost: 5000, value: 10, type: 'click' }
-];
-
-const Game = () => {
-  const [numCookies, setNumCookies] = useState(100);
-  const [cookiesPerClick, setCookiesPerClick] = useState(1);
-  const [purchasedItems, setPurchasedItems] = useState({
-    cursor: 0,
-    grandma: 0,
-    farm: 0,
-    megacursor: 0
-  });
+const Game = ({
+  numCookies,
+  setNumCookies,
+  cookiesPerClick,
+  setCookiesPerClick,
+  purchasedItems,
+  setPurchasedItems,
+  calculateCookiesPerTick,
+  items }
+) => {
   const [playCrunch] = useSound(sndCrunch);
   const [playCookieMonster] = useSound(sndCookieMonster);
-
-  // Prevent the default action of the spacebar registering a click event
-  // on the cookie if it has focus.
-  // const handleKeyUp = (event) => {
-  //   console.log(event.current.currentTarget);
-  //   event.preventDefault();
-  // }
 
   useEffect(() => {
     playCookieMonster();
@@ -76,20 +63,6 @@ const Game = () => {
   
     setNumCookies(numCookies + numOfGeneratedCookies);
   }, 1000);
-
-  const calculateCookiesPerTick = (purchasedItems) => {
-    let totalValue = 0;
-
-    Object.keys(purchasedItems).forEach(key => {
-      const item = items.find(item => item.id === key);
-      
-      if (item.type === 'tick') {
-        totalValue += purchasedItems[key] * item.value;
-      }
-    });
-
-    return totalValue;
-  }
 
   useDocumentTitle(numCookies + ' - Cookie Clicker', 'Cookie Clicker');
   useKeydown('Space', handleCookieClick);
