@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import useSound from 'use-sound';
 
 import Item from './Item';
-import useInterval from '../hooks/use-interval.hook';
 import useKeydown from '../hooks/useKeydown';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
@@ -57,12 +56,6 @@ const Game = ({
     setNumCookies(numCookies + cookiesPerClick);
     playCrunch();
   }
-
-  useInterval(() => {
-    const numOfGeneratedCookies = calculateCookiesPerTick(purchasedItems);
-  
-    setNumCookies(numCookies + numOfGeneratedCookies);
-  }, 1000);
 
   useDocumentTitle(numCookies + ' - Cookie Clicker', 'Cookie Clicker');
   useKeydown('Space', handleCookieClick);
