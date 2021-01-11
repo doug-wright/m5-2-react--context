@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
@@ -7,22 +7,25 @@ import useSound from 'use-sound';
 import Item from './Item';
 import useKeydown from '../hooks/useKeydown';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { GameContext } from "./GameContext";
 
 import cookieSrc from "../cookie.svg";
 import cookieMonster from '../monster32.png';
 import sndCrunch from '../crunch.mp3';
 import sndCookieMonster from '../cookie-monster.mp3';
 
-const Game = ({
-  numCookies,
-  setNumCookies,
-  cookiesPerClick,
-  setCookiesPerClick,
-  purchasedItems,
-  setPurchasedItems,
-  calculateCookiesPerTick,
-  items }
-) => {
+const Game = () => {
+  const {
+    numCookies,
+    setNumCookies,
+    cookiesPerClick,
+    setCookiesPerClick,
+    purchasedItems,
+    setPurchasedItems,
+    calculateCookiesPerTick,
+    items
+  } = useContext(GameContext);
+
   const [playCrunch] = useSound(sndCrunch);
   const [playCookieMonster] = useSound(sndCookieMonster);
 

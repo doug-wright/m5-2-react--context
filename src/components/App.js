@@ -1,37 +1,19 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import GlobalStyles from "./GlobalStyles";
 import Home from "./Home";
 import Game from "./Game";
+import { GameContext } from "./GameContext";
 import useInterval from '../hooks/use-interval.hook';
-import usePersistedState from '../hooks/usePersistedState';
 
-import items from '../data';
-
-function App(props) {
-  const [numCookies, setNumCookies] = usePersistedState(100, 'num-cookies');
-  const [cookiesPerClick, setCookiesPerClick] = useState(1);
-  const [purchasedItems, setPurchasedItems] = useState({
-    cursor: 0,
-    grandma: 0,
-    farm: 0,
-    megacursor: 0
-  });
-
-  const calculateCookiesPerTick = (purchasedItems) => {
-    let totalValue = 0;
-
-    Object.keys(purchasedItems).forEach(key => {
-      const item = items.find(item => item.id === key);
-      
-      if (item.type === 'tick') {
-        totalValue += purchasedItems[key] * item.value;
-      }
-    });
-
-    return totalValue;
-  }
+function App() {
+  const {
+    numCookies,
+    setNumCookies,
+    purchasedItems,
+    calculateCookiesPerTick
+  } = useContext(GameContext);
 
   useInterval(() => {
     const numOfGeneratedCookies = calculateCookiesPerTick(purchasedItems);
@@ -47,16 +29,7 @@ function App(props) {
           <Home />
         </Route>
         <Route path="/game">
-          <Game
-            numCookies={numCookies}
-            setNumCookies={setNumCookies}
-            cookiesPerClick={cookiesPerClick}
-            setCookiesPerClick={setCookiesPerClick}
-            purchasedItems={purchasedItems}
-            setPurchasedItems={setPurchasedItems}
-            calculateCookiesPerTick={calculateCookiesPerTick}
-            items={items}
-          />
+          <Game />
         </Route>
       </Router>
     </>
