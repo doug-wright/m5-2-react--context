@@ -29,17 +29,17 @@ const Title = styled.h1`
 
 const Img = styled.img`
   margin-top: 50px;
-  animation: scaleIt 1s alternate infinite ease-in-out;
+  animation: scaleIt 0.8s alternate infinite ease-in-out;
 
   @keyframes scaleIt {
     0% {
       transform: scale(1);
     }
+
     100% {
       transform: scale(1.1);
     }
   }
-}
 `;
 
 export default Home;
