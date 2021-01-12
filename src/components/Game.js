@@ -15,6 +15,7 @@ import sndCrunch from '../crunch.mp3';
 import sndCookieMonster from '../cookie-monster.mp3';
 
 const Game = () => {
+  // Use context
   const {
     numCookies,
     setNumCookies,
@@ -26,9 +27,11 @@ const Game = () => {
     items
   } = useContext(GameContext);
 
+  // Define sounds
   const [playCrunch] = useSound(sndCrunch);
   const [playCookieMonster] = useSound(sndCookieMonster);
 
+  // Play intro sound
   useEffect(() => {
     playCookieMonster();
   }, [playCookieMonster]);
@@ -44,20 +47,32 @@ const Game = () => {
 
       setNumCookies(numCookies - item.cost);
       setPurchasedItems({ ...purchasedItems, [item.id]: purchasedItems[item.id] + 1 });
+
+      // Increase pricing a random percentage from 1 to 10
+      const percentInc = Math.floor((Math.random() * 10) + 1) / 100 + 1;
+      const newCost = Math.floor(percentInc * item.cost);
+
+      items[index].cost = newCost;
     } else {
       window.alert(`You can't afford a ${item.name}`);
     }
-
-    // Increase pricing a random percentage from 1 to 10
-    const percentInc = Math.floor((Math.random() * 10) + 1) / 100 + 1;
-    const newCost = Math.floor(percentInc * item.cost);
-
-    items[index].cost = newCost;
   }
   
   const handleCookieClick = () => {
     setNumCookies(numCookies + cookiesPerClick);
     playCrunch();
+  }
+
+  // Set all game state back to defaults
+  const reinitializeGame = () => {
+    setNumCookies(100);
+    setCookiesPerClick(1);
+    setPurchasedItems({ cursor: 0, grandma: 0, farm: 0, megacursor: 0 });
+    
+    // Restore default items costs
+    for (let i = 0; i < items.length; i++) {
+      items[i].cost = items[i].defaultCost;
+    }
   }
 
   useDocumentTitle(numCookies + ' - Cookie Clicker', 'Cookie Clicker');
@@ -69,6 +84,7 @@ const Game = () => {
         <Indicator>
           <Total>{numCookies} cookies</Total>
           <strong>{calculateCookiesPerTick(purchasedItems)}</strong> cookies per second, <strong>{cookiesPerClick}</strong> cookie(s) per click
+          <p><ResetButton onClick={reinitializeGame}>Re-Initialize Game</ResetButton></p>
         </Indicator>
         <Button onClick={handleCookieClick}>
           <Cookie src={cookieSrc} />
@@ -107,6 +123,14 @@ const GameArea = styled.div`
 const Button = styled.button`
   border: none;
   background: transparent;
+  cursor: url(${cookieMonster}), pointer;
+`;
+
+const ResetButton = styled.button`
+  margin: 5px;
+  padding: 3px;
+  border: none;
+  border-radius: 3px;
   cursor: url(${cookieMonster}), pointer;
 `;
 

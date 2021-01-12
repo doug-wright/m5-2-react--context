@@ -7,13 +7,16 @@ export const GameContext = createContext(null);
 
 export const GameProvider = ({ children }) => {
   const [numCookies, setNumCookies] = usePersistedState(100, 'num-cookies');
-  const [cookiesPerClick, setCookiesPerClick] = useState(1);
-  const [purchasedItems, setPurchasedItems] = useState({
+  const [cookiesPerClick, setCookiesPerClick] = usePersistedState(1, 'cookies-per-click');
+  const [purchasedItems, setPurchasedItems] = usePersistedState({
     cursor: 0,
     grandma: 0,
     farm: 0,
     megacursor: 0
-  });
+  }, 'purchased-items');
+  const now = new Date();
+  const [time, setTime] = usePersistedState(Math.round(now.getTime() / 1000), 'time');
+  const itemsDefault = items;
 
   const calculateCookiesPerTick = (purchasedItems) => {
     let totalValue = 0;
@@ -38,7 +41,10 @@ export const GameProvider = ({ children }) => {
         purchasedItems,
         setPurchasedItems,
         calculateCookiesPerTick,
-        items
+        items,
+        time,
+        setTime,
+        itemsDefault
       }}
     >
       {children}
