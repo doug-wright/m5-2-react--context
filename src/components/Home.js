@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 import imgCookieMonster from '../cookie-monster.png';
 
@@ -27,19 +27,19 @@ const Title = styled.h1`
   margin-bottom: 32px;
 `;
 
+const scaleIt = keyframes`
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.1);
+  }
+`;
+
 const Img = styled.img`
   margin-top: 50px;
-  animation: scaleIt 0.8s alternate infinite ease-in-out;
-
-  @keyframes scaleIt {
-    0% {
-      transform: scale(1);
-    }
-
-    100% {
-      transform: scale(1.1);
-    }
-  }
+  animation: ${scaleIt} 0.8s alternate infinite ease-in-out;
 `;
 
 export default Home;
